@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "constants.h"
 
 struct StyledText {
     char * text;
@@ -15,7 +16,6 @@ const int WIDTH = 90;
 const int HEIGHT = 20;
 
 const int STYLE_BUFFER_SIZE = 64;
-
 int X_POS = 0;
 int Y_POS = 0;
 
@@ -92,15 +92,6 @@ void place_at(char * message,int x,int y){
  * Style builder functions
  */
 
-struct StyledText * init_style(){
-    char * style_buffer = malloc(STYLE_BUFFER_SIZE);
-    strcpy(style_buffer,"\\033[");
-    struct StyledText * st = malloc(sizeof (struct StyledText));
-    st->text = style_buffer;
-    st->size = STYLE_BUFFER_SIZE;
-    return st;
-}
-
 void safe_cat (struct StyledText * st, char * new_message){
     while (strl(st->text) + strl(new_message) >= st->size){
         printf("Reallocating, size: %d\n",st->size);
@@ -111,6 +102,20 @@ void safe_cat (struct StyledText * st, char * new_message){
         st->size *= 2;
     }
     strcat(st->text,new_message);
+}
+
+struct StyledText * init_style(){
+    char * style_buffer = malloc(STYLE_BUFFER_SIZE);
+    strcpy(style_buffer,"\\033[");
+    struct StyledText * st = malloc(sizeof (struct StyledText));
+    st->text = style_buffer;
+    st->size = STYLE_BUFFER_SIZE;
+    return st;
+}
+
+struct StyledText * set_main_style(struct StyledText * st){
+
+    return st;
 }
 
 struct StyledText * finish(struct StyledText * st){
