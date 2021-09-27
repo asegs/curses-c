@@ -4,13 +4,46 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "constants.h"
+
+const int DISABLE = 0;
+const int BOLD = 1;
+const int FAINT = 2;
+const int ITAL = 3;
+const int UL = 4;
+const int BLINK_ON = 5;
+const int SWAP = 7;
+const int INVIS = 8;
+const int STRIKE = 9;
+const int STD = 10;
+const int DOUBLE_UL = 21;
+const int BLINK_OFF = 25;
+const int SWAP_OFF = 27;
+const int VIS = 28;
+const int GRAY_FG = 30;
+const int RED_FG = 31;
+const int LB_FG = 32;
+const int PINK_FG = 33;
+const int BLUE_FG = 34;
+const int MAG_FG = 35;
+const int GREEN_FG = 36;
+const int SALMON_FG = 37;
+const int RES_FG = 39;
+const int DARK_GREEN_BG = 40;
+const int RED_BG = 41;
+const int LB_BG = 42;
+const int WHITE_BG = 43;
+const int BLUE_BG = 44;
+const int MAG_BG = 45;
+const int GREEN_BG = 46;
+const int BEIGE_BG = 47;
+const int RES_BG = 49;
+const int OL = 53;
+const int RES_OL = 55;
 
 struct StyledText {
     char * text;
     int size;
 };
-
 
 const int WIDTH = 90;
 const int HEIGHT = 20;
@@ -106,20 +139,44 @@ void safe_cat (struct StyledText * st, char * new_message){
 
 struct StyledText * init_style(){
     char * style_buffer = malloc(STYLE_BUFFER_SIZE);
-    strcpy(style_buffer,"\\033[");
+    strcpy(style_buffer,"\033[");
     struct StyledText * st = malloc(sizeof (struct StyledText));
     st->text = style_buffer;
     st->size = STYLE_BUFFER_SIZE;
     return st;
 }
 
-struct StyledText * set_main_style(struct StyledText * st){
-
+struct StyledText *  add_simple_style(struct StyledText * st,int style_const){
+    char * style_buf = malloc(16);
+    sprintf(style_buf,"%d;",style_const);
+    safe_cat(st,style_buf);
     return st;
 }
 
-struct StyledText * finish(struct StyledText * st){
-    safe_cat(st,"\\03[0");
+struct StyledText * add_rgb_style_fg(struct StyledText * st,int r, int g, int b){
+    char * style_code = malloc(32);
+    sprintf(style_code,"38;2;%d;%d;%d;",r,g,b);
+    safe_cat(st,style_code);
+    free(style_code);
+    return st;
+}
+
+struct StyledText * add_rgb_style_bg(struct StyledText * st,int r,int g,int b){
+    char * style_code = malloc(32);
+    sprintf(style_code,"48;2;%d;%d:%d;",r,g,b);
+    safe_cat(st,style_code);
+    free(style_code);
+    return st;
+}
+
+struct StyledText * add_message(struct StyledText * st,char * message){
+    st->text[strl(st->text)-1] = 'm';
+    safe_cat(st,message);
+    return st;
+}
+
+struct StyledText * terminate(struct StyledText * st){
+    safe_cat(st,"\033[0m");
     return st;
 }
 
@@ -136,8 +193,15 @@ int main(){
     for (int i = HEIGHT;i>=1;i--){
         place_at("Hello bae",HEIGHT + (HEIGHT - i),i);
     }
+    struct StyledText * st = init_style();
+    st = add_rgb_style_fg(st,0,0,0);
+    st = add_simple_style(st,UL);
+    st = add_message(st,"Aaron!");
+    st = terminate(st);
 
-    printf("%s\n",finish(init_style())->text);
+
+    printf("%s",st->text);
+    fflush(stdout);
     while(1){
         ;
     }
