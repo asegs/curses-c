@@ -40,7 +40,7 @@ const int RES_BG = 49;
 const int OL = 53;
 const int RES_OL = 55;
 
-struct StyledText {
+struct Style {
     char * text;
     int size;
 };
@@ -121,11 +121,18 @@ void place_at(char * message,int x,int y){
     print_render(message);
 }
 
+void place_st_at(struct Style * st,char * message,int x, int y){
+    char * to_place = malloc(strl(st->text) + strl(message));
+    sprintf(to_place,st->text,message);
+    place_at(to_place,x,y);
+    free(to_place);
+}
+
 /*
  * Style builder functions
  */
 
-void safe_cat (struct StyledText * st, char * new_message){
+void safe_cat (struct Style * st, char * new_message){
     while (strl(st->text) + strl(new_message) >= st->size){
         printf("Reallocating, size: %d\n",st->size);
         char * new_mem = malloc(st->size * 2);
@@ -137,71 +144,51 @@ void safe_cat (struct StyledText * st, char * new_message){
     strcat(st->text,new_message);
 }
 
-struct StyledText * init_style(){
+struct Style * init_style(){
     char * style_buffer = malloc(STYLE_BUFFER_SIZE);
     strcpy(style_buffer,"\033[");
-    struct StyledText * st = malloc(sizeof (struct StyledText));
+    struct Style * st = malloc(sizeof (struct Style));
     st->text = style_buffer;
     st->size = STYLE_BUFFER_SIZE;
     return st;
 }
 
-struct StyledText *  add_simple_style(struct StyledText * st,int style_const){
+void add_simple_style(struct Style * st,int style_const){
     char * style_buf = malloc(16);
     sprintf(style_buf,"%d;",style_const);
     safe_cat(st,style_buf);
-    return st;
 }
 
-struct StyledText * add_rgb_style_fg(struct StyledText * st,int r, int g, int b){
+void add_rgb_style_fg(struct Style * st,int r, int g, int b){
     char * style_code = malloc(32);
     sprintf(style_code,"38;2;%d;%d;%d;",r,g,b);
     safe_cat(st,style_code);
     free(style_code);
-    return st;
 }
 
-struct StyledText * add_rgb_style_bg(struct StyledText * st,int r,int g,int b){
+void add_rgb_style_bg(struct Style * st,int r,int g,int b){
     char * style_code = malloc(32);
     sprintf(style_code,"48;2;%d;%d:%d;",r,g,b);
     safe_cat(st,style_code);
     free(style_code);
-    return st;
 }
 
-struct StyledText * add_message(struct StyledText * st,char * message){
+struct Style * finish(struct Style * st){
     st->text[strl(st->text)-1] = 'm';
-    safe_cat(st,message);
+    safe_cat(st,"%s\033[0m");
     return st;
 }
-
-struct StyledText * terminate(struct StyledText * st){
-    safe_cat(st,"\033[0m");
-    return st;
-}
-
-
-
-
-
 
 int main(){
     init();
-    for (int i = 1;i<HEIGHT;i++){
-        place_at("Hello bae",i,i);
-    }
-    for (int i = HEIGHT;i>=1;i--){
-        place_at("Hello bae",HEIGHT + (HEIGHT - i),i);
-    }
-    struct StyledText * st = init_style();
-    st = add_rgb_style_fg(st,0,0,0);
-    st = add_simple_style(st,UL);
-    st = add_message(st,"Aaron!");
-    st = terminate(st);
-
-
-    printf("%s",st->text);
-    fflush(stdout);
+    struct Style * st = init_style();
+    add_rgb_style_fg(st,0,0,0);
+    add_simple_style(st,UL);
+    add_simple_style(st,BOLD);
+    finish(st);
+    place_st_at(st,"Hello friends!",10,10);
+    place_st_at(st,"Welcome home.",5,5);
+    place_st_at(st,"And again.",20,20);
     while(1){
         ;
     }
