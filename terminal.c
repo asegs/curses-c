@@ -40,6 +40,8 @@ const int RES_BG = 49;
 const int OL = 53;
 const int RES_OL = 55;
 
+const char * RESET = "\033[0m";
+
 struct Style {
     char * text;
     int size;
@@ -94,10 +96,10 @@ void render(){
     fflush(stdout);
 }
 
-void print_render(char * message){
+void print_render(char * message,int m_len){
     printf("%s",message);
     render();
-    move_left(strl(message));
+    move_left(m_len);
 }
 
 void move_to(int x, int y){
@@ -116,15 +118,28 @@ void move_to(int x, int y){
     Y_POS = y;
 }
 
-void place_at(char * message,int x,int y){
+void wipe_n_tiles(int n){
+    printf("%s",RESET);
+    while (n-- >= 0){
+        putchar('a');
+    }
+    fflush(stdout);
+}
+
+void place_at(char * message,int x,int y,int m_len){
     move_to(x,y);
-    print_render(message);
+    print_render(message,m_len);
+}
+
+void wipe_at(int n, int x, int y) {
+    move_to(x,y);
+    wipe_n_tiles(n);
 }
 
 void place_st_at(struct Style * st,char * message,int x, int y){
     char * to_place = malloc(strl(st->text) + strl(message));
     sprintf(to_place,st->text,message);
-    place_at(to_place,x,y);
+    place_at(to_place,x,y,strl(message));
     free(to_place);
 }
 
@@ -168,7 +183,7 @@ void add_rgb_style_fg(struct Style * st,int r, int g, int b){
 
 void add_rgb_style_bg(struct Style * st,int r,int g,int b){
     char * style_code = malloc(32);
-    sprintf(style_code,"48;2;%d;%d:%d;",r,g,b);
+    sprintf(style_code,"48;2;%d;%d;%d;",r,g,b);
     safe_cat(st,style_code);
     free(style_code);
 }
@@ -185,10 +200,14 @@ int main(){
     add_rgb_style_fg(st,0,0,0);
     add_simple_style(st,UL);
     add_simple_style(st,BOLD);
+    add_simple_style(st,STRIKE);
+    add_simple_style(st,ITAL);
+    add_rgb_style_bg(st,255,255,255);
     finish(st);
-    place_st_at(st,"Hello friends!",10,10);
-    place_st_at(st,"Welcome home.",5,5);
-    place_st_at(st,"And again.",20,20);
+    place_st_at(st," Hello friends! ",0,0);
+    place_st_at(st," Welcome home. ",5,5);
+    place_st_at(st," And again. ",10,10);
+    wipe_at(4,10,10);
     while(1){
         ;
     }
