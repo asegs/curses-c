@@ -1,6 +1,16 @@
 //
 // Created by arctic on 9/24/21.
 //
+
+/*
+ * To do:
+ * Store text as buffer
+ * Change position when text is rendered and any move function is called
+ * Use buffer function to allow highlighting of text blocks
+ * Allow responses directly to different key inputs from user, like arrow keys and enter
+ * Limit writing on certain protected coords
+ *
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,8 +57,8 @@ struct Style {
     int size;
 };
 
-const int WIDTH = 90;
-const int HEIGHT = 20;
+const int WIDTH = 210;
+const int HEIGHT = 50;
 
 const int STYLE_BUFFER_SIZE = 64;
 int X_POS = 0;
@@ -202,22 +212,54 @@ struct Style * finish(struct Style * st){
     return st;
 }
 
+void tile(int odd,int r,int g,int bl){
+    struct Style * red = init_style();
+    struct Style * green = init_style();
+    add_rgb_style_bg(green,r,g,bl);
+    add_rgb_style_bg(red,255-r,255-g,255-bl);
+    finish(green);
+    finish(red);
+    int i,b = 0;
+    for (i = 0;i<HEIGHT;i++){
+        for (b = 0;b<WIDTH;b++){
+            if (odd == 0){
+                place_st_at(green," ",b,i);
+            } else {
+                place_st_at(red," ",b,i);
+            }
+            odd = !odd;
+        }
+        if (WIDTH % 2 == 0){
+            odd = !odd;
+        }
+    }
+}
+
 int main(){
     init();
     struct Style * st = init_style();
     add_rgb_style_fg(st,0,0,0);
     add_simple_style(st,UL);
     add_simple_style(st,BOLD);
-    add_simple_style(st,STRIKE);
     add_simple_style(st,ITAL);
     add_rgb_style_bg(st,255,255,255);
     finish(st);
-    place_st_at(st," Hello friends! ",0,0);
-    place_st_at(st," Welcome home. ",5,5);
-    place_st_at(st," And again. ",10,10);
-    wipe_at(4,10,10);
-
-    while(1){
-        ;
+//    place_st_at(st," Hello friends! ",0,0);
+//    place_st_at(st," Welcome home. ",5,5);
+//    place_st_at(st," And again. ",10,10);
+//    wipe_at(4,10,10);
+    int odd = 0;
+    int ct = 0;
+    for (int r = 0;r<256;r++){
+        for (int g = 0; g < 256; g++){
+            for (int b = 0; b< 256;b++){
+                tile(odd,r,g,b);
+                ct++;
+            }
+            for (int b = 255;b>=0;b--){
+                tile(odd,r,g,b);
+                ct++;
+            }
+        }
     }
 }
