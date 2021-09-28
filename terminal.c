@@ -77,19 +77,27 @@ int strl(const char * c){
 
 
 void move_left(int n){
-    printf("\033[%dD",n);
+    if (n > 0){
+        printf("\033[%dD",n);
+    }
 }
 
 void move_right(int n){
-    printf("\033[%dC",n);
+    if (n > 0){
+        printf("\033[%dC",n);
+    }
 }
 
 void move_down(int n){
-    printf("\033[%dB",n);
+    if (n > 0){
+        printf("\033[%dB",n);
+    }
 }
 
 void move_up(int n){
-    printf("\033[%dA",n);
+    if (n > 0){
+        printf("\033[%dA",n);
+    }
 }
 
 void render(){
@@ -103,7 +111,7 @@ void print_render(char * message,int m_len){
 }
 
 void move_to(int x, int y){
-    if (x - X_POS >= 0){
+    if (x - X_POS > 0){
         move_right(x-X_POS);
     }else{
         move_left((x - X_POS) * -1);
@@ -121,7 +129,7 @@ void move_to(int x, int y){
 void wipe_n_tiles(int n){
     printf("%s",RESET);
     while (n-- >= 0){
-        putchar('a');
+        putchar(' ');
     }
     fflush(stdout);
 }
@@ -208,6 +216,7 @@ int main(){
     place_st_at(st," Welcome home. ",5,5);
     place_st_at(st," And again. ",10,10);
     wipe_at(4,10,10);
+
     while(1){
         ;
     }
